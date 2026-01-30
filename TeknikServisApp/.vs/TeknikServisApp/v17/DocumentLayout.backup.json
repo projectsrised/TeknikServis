@@ -1,0 +1,72 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "\\\\Mac\\Home\\Desktop\\TeknikServisApp\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|\\\\Mac\\Home\\Desktop\\TeknikServisApp\\src\\Infrastructure\\Migrations\\20260123075826_InitialMigration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4E5F6A7-4567-89AB-CDEF-012345678901}|src\\API\\API.csproj|\\\\mac\\home\\desktop\\teknikservisapp\\src\\api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B2C3D4E5-2345-6789-ABCD-EF0123456789}|src\\Application\\Application.csproj|\\\\mac\\home\\desktop\\teknikservisapp\\src\\application\\services\\kategoriurunservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "20260123075826_InitialMigration.cs",
+              "DocumentMoniker": "\\\\Mac\\Home\\Desktop\\TeknikServisApp\\src\\Infrastructure\\Migrations\\20260123075826_InitialMigration.cs",
+              "RelativeDocumentMoniker": "src\\Infrastructure\\Migrations\\20260123075826_InitialMigration.cs",
+              "ToolTip": "\\\\Mac\\Home\\Desktop\\TeknikServisApp\\src\\Infrastructure\\Migrations\\20260123075826_InitialMigration.cs",
+              "RelativeToolTip": "src\\Infrastructure\\Migrations\\20260123075826_InitialMigration.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAA3AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-23T07:58:26.911Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "\\\\Mac\\Home\\Desktop\\TeknikServisApp\\src\\API\\appsettings.json",
+              "RelativeDocumentMoniker": "src\\API\\appsettings.json",
+              "ToolTip": "\\\\Mac\\Home\\Desktop\\TeknikServisApp\\src\\API\\appsettings.json",
+              "RelativeToolTip": "src\\API\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAABzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-01-23T07:57:09.931Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "KategoriUrunService.cs",
+              "DocumentMoniker": "\\\\Mac\\Home\\Desktop\\TeknikServisApp\\src\\Application\\Services\\KategoriUrunService.cs",
+              "RelativeDocumentMoniker": "src\\Application\\Services\\KategoriUrunService.cs",
+              "ToolTip": "\\\\Mac\\Home\\Desktop\\TeknikServisApp\\src\\Application\\Services\\KategoriUrunService.cs",
+              "RelativeToolTip": "src\\Application\\Services\\KategoriUrunService.cs",
+              "ViewState": "AgIAAGYAAAAAAAAAAAAowGgAAAA1AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-23T07:42:48.597Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

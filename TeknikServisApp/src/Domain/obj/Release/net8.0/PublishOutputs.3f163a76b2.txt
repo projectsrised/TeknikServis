@@ -1,0 +1,3 @@
+/Users/buber/Desktop/TeknikServisTelefon/TeknikServisApp/publish/Domain.dll
+/Users/buber/Desktop/TeknikServisTelefon/TeknikServisApp/publish/Domain.deps.json
+/Users/buber/Desktop/TeknikServisTelefon/TeknikServisApp/publish/Domain.pdb

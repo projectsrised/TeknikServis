@@ -1,0 +1,57 @@
+# macOS
+.DS_Store
+Thumbs.db
+
+# Visual Studio / .NET
+.vs/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.sln.docstates
+**/bin/
+**/obj/
+**/packages/
+artifacts/
+publish/
+
+# Rider / IDE
+.idea/
+.vscode/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+build/
+dist/
+.vercel/
+.now/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Frontend specific
+TeknikServisfrontend/node_modules/
+TeknikServisfrontend/.next/
+TeknikServisfrontend/.env.local
+
+# Secrets and certificates
+*.key
+*.pem
+*.pfx
+*.secret
+
+# NuGet packages
+*.nupkg
+
+# Misc
+Thumbs.db
