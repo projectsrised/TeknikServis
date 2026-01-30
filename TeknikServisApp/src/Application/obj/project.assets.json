@@ -974,33 +974,32 @@
     ]
   },
   "packageFolders": {
-    "/Users/buber/.nuget/packages/": {}
+    "/Users/emila/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/buber/Desktop/TeknikServisTelefon/TeknikServisApp/src/Application/Application.csproj",
+      "projectUniqueName": "/Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Application/Application.csproj",
       "projectName": "Application",
-      "projectPath": "/Users/buber/Desktop/TeknikServisTelefon/TeknikServisApp/src/Application/Application.csproj",
-      "packagesPath": "/Users/buber/.nuget/packages/",
-      "outputPath": "/Users/buber/Desktop/TeknikServisTelefon/TeknikServisApp/src/Application/obj/",
+      "projectPath": "/Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Application/Application.csproj",
+      "packagesPath": "/Users/emila/.nuget/packages/",
+      "outputPath": "/Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Application/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/buber/.nuget/NuGet/NuGet.Config"
+        "/Users/emila/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
-        "/usr/local/share/dotnet/library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "/Users/buber/Desktop/TeknikServisTelefon/TeknikServisApp/src/Domain/Domain.csproj": {
-              "projectPath": "/Users/buber/Desktop/TeknikServisTelefon/TeknikServisApp/src/Domain/Domain.csproj"
+            "/Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Domain/Domain.csproj": {
+              "projectPath": "/Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Domain/Domain.csproj"
             }
           }
         }
@@ -1061,7 +1060,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.203/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.417/PortableRuntimeIdentifierGraph.json"
       }
     }
   },
@@ -1070,7 +1069,7 @@
       "code": "NU1902",
       "level": "Warning",
       "warningLevel": 1,
-      "message": "Package 'System.IdentityModel.Tokens.Jwt' 7.0.3 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-59j7-ghrg-fj52",
+      "message": "'System.IdentityModel.Tokens.Jwt' 7.0.3 paketinde önem derecesi orta olan bilinen bir https://github.com/advisories/GHSA-59j7-ghrg-fj52 güvenlik açığı var",
       "libraryId": "System.IdentityModel.Tokens.Jwt",
       "targetGraphs": [
         "net8.0"

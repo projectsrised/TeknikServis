@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "GyQGiHQ8lKNXUtcMaQ/QTpaU8LlL5FVds2ido3P3LUuC8i6Woyv/sKmxbCQlNhSDUIZ+UCS8KvR970KWVtSAXw==",
+  "dgSpecHash": "o/v7vafXJmg=",
   "success": true,
-  "projectFilePath": "/Users/buber/Desktop/TeknikServisTelefon/TeknikServisApp/src/Domain/Domain.csproj",
+  "projectFilePath": "/Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Domain/Domain.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

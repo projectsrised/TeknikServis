@@ -583,10 +583,15 @@ public class SeriNumarasiDetayDto
     public string SeriNo { get; set; } = null!;
     public Guid UrunId { get; set; }
     public string? UrunAd { get; set; }
+    public string? Barkod { get; set; }
+    public string? KategoriAd { get; set; }
+    public DateTime? UretimTarihi { get; set; }
+    public string? Mensei { get; set; }
     public string? MevcutDepoAd { get; set; }
     public string? MevcutBayiAd { get; set; }
     public bool Satildi { get; set; }
     public DateTime? SatisTarihi { get; set; }
+    public DateTime GirisTarihi { get; set; }
     public decimal? AlisFiyati { get; set; }
     public decimal? SatisFiyati { get; set; }
 }
@@ -604,6 +609,14 @@ public class StokCikisDto
 {
     public Guid DepoId { get; set; }
     public List<string> SeriNumaralari { get; set; } = new();
+    public string? Aciklama { get; set; }
+}
+
+public class SeriNumarasiUpdateDto
+{
+    public Guid? DepoId { get; set; }
+    public decimal? AlisFiyati { get; set; }
+    public decimal? SatisFiyati { get; set; }
     public string? Aciklama { get; set; }
 }
 

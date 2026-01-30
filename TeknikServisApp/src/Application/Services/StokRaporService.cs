@@ -157,7 +157,7 @@ public async Task<List<StokDurumDto>> GetTumStokDurumuAsync(Guid? bayiId = null)
     {
         var seri = await _unitOfWork.Repository<SeriNumarasi>()
             .Query()
-            .Include(s => s.Urun)
+            .Include(s => s.Urun).ThenInclude(u => u.Kategori)
             .Include(s => s.Depo).ThenInclude(d => d.Bayi)
             .FirstOrDefaultAsync(s => s.SeriNo == seriNo && !s.Silindi);
 
@@ -169,10 +169,15 @@ public async Task<List<StokDurumDto>> GetTumStokDurumuAsync(Guid? bayiId = null)
             SeriNo = seri.SeriNo,
             UrunId = seri.UrunId,
             UrunAd = seri.Urun?.Ad ?? "",
+            Barkod = seri.Urun?.Barkod,
+            KategoriAd = seri.Urun?.Kategori?.Ad,
+            UretimTarihi = seri.GirisTarihi,
+            Mensei = seri.Urun?.Marka,
             MevcutDepoAd = seri.Depo?.Ad,
             MevcutBayiAd = seri.Depo?.Bayi?.Ad,
             Satildi = seri.Satildi,
             SatisTarihi = seri.SatisTarihi,
+            GirisTarihi = seri.GirisTarihi,
             AlisFiyati = seri.AlisFiyati,
             SatisFiyati = seri.SatisFiyati
         };
@@ -508,6 +513,129 @@ public async Task<List<StokDurumDto>> GetTumStokDurumuAsync(Guid? bayiId = null)
             barkod += random.Next(0, 10).ToString();
         }
         return barkod;
+    }
+
+    public async Task<PagedResultDto<SeriNumarasiDetayDto>> GetStokKalemleriAsync(int page, int pageSize, Guid? urunId = null, Guid? depoId = null, bool? satildi = null)
+    {
+        var query = _unitOfWork.Repository<SeriNumarasi>()
+            .Query()
+            .Include(s => s.Urun).ThenInclude(u => u.Kategori)
+            .Include(s => s.Depo).ThenInclude(d => d.Bayi)
+            .Where(s => !s.Silindi);
+
+        if (urunId.HasValue)
+            query = query.Where(s => s.UrunId == urunId.Value);
+        if (depoId.HasValue)
+            query = query.Where(s => s.DepoId == depoId.Value);
+        if (satildi.HasValue)
+            query = query.Where(s => s.Satildi == satildi.Value);
+
+        var total = await query.CountAsync();
+        var items = await query
+            .OrderByDescending(s => s.GirisTarihi)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PagedResultDto<SeriNumarasiDetayDto>
+        {
+            Items = items.Select(s => new SeriNumarasiDetayDto
+            {
+                Id = s.Id,
+                SeriNo = s.SeriNo,
+                UrunId = s.UrunId,
+                UrunAd = s.Urun?.Ad ?? "",
+                Barkod = s.Urun?.Barkod,
+                KategoriAd = s.Urun?.Kategori?.Ad,
+                UretimTarihi = s.GirisTarihi,
+                Mensei = s.Urun?.Marka,
+                MevcutDepoAd = s.Depo?.Ad,
+                MevcutBayiAd = s.Depo?.Bayi?.Ad,
+                Satildi = s.Satildi,
+                SatisTarihi = s.SatisTarihi,
+                GirisTarihi = s.GirisTarihi,
+                AlisFiyati = s.AlisFiyati,
+                SatisFiyati = s.SatisFiyati
+            }).ToList(),
+            TotalCount = total,
+            Page = page,
+            PageSize = pageSize
+        };
+    }
+
+    public async Task<ApiResponseDto<SeriNumarasiDetayDto>> UpdateStokKalemiAsync(Guid id, SeriNumarasiUpdateDto dto)
+    {
+        var seri = await _unitOfWork.Repository<SeriNumarasi>()
+            .Query()
+            .Include(s => s.Urun).ThenInclude(u => u.Kategori)
+            .Include(s => s.Depo).ThenInclude(d => d.Bayi)
+            .FirstOrDefaultAsync(s => s.Id == id && !s.Silindi);
+
+        if (seri == null)
+            return ApiResponseDto<SeriNumarasiDetayDto>.Fail("Stok kalemi bulunamadı");
+
+        if (seri.Satildi)
+            return ApiResponseDto<SeriNumarasiDetayDto>.Fail("Satılmış stok kalemi düzenlenemez");
+
+        if (dto.DepoId.HasValue)
+        {
+            var depo = await _unitOfWork.Repository<Depo>().GetByIdAsync(dto.DepoId.Value);
+            if (depo == null)
+                return ApiResponseDto<SeriNumarasiDetayDto>.Fail("Depo bulunamadı");
+            seri.DepoId = dto.DepoId.Value;
+            seri.BayiId = depo.BayiId;
+        }
+
+        if (dto.AlisFiyati.HasValue)
+            seri.AlisFiyati = dto.AlisFiyati.Value;
+        if (dto.SatisFiyati.HasValue)
+            seri.SatisFiyati = dto.SatisFiyati.Value;
+        if (dto.Aciklama != null)
+            seri.Aciklama = dto.Aciklama;
+
+        await _unitOfWork.SaveChangesAsync();
+
+        var updatedSeri = await _unitOfWork.Repository<SeriNumarasi>()
+            .Query()
+            .Include(s => s.Urun).ThenInclude(u => u.Kategori)
+            .Include(s => s.Depo).ThenInclude(d => d.Bayi)
+            .FirstOrDefaultAsync(s => s.Id == id);
+
+        return ApiResponseDto<SeriNumarasiDetayDto>.Ok(new SeriNumarasiDetayDto
+        {
+            Id = updatedSeri!.Id,
+            SeriNo = updatedSeri.SeriNo,
+            UrunId = updatedSeri.UrunId,
+            UrunAd = updatedSeri.Urun?.Ad ?? "",
+            Barkod = updatedSeri.Urun?.Barkod,
+            KategoriAd = updatedSeri.Urun?.Kategori?.Ad,
+            UretimTarihi = updatedSeri.GirisTarihi,
+            Mensei = updatedSeri.Urun?.Marka,
+            MevcutDepoAd = updatedSeri.Depo?.Ad,
+            MevcutBayiAd = updatedSeri.Depo?.Bayi?.Ad,
+            Satildi = updatedSeri.Satildi,
+            SatisTarihi = updatedSeri.SatisTarihi,
+            GirisTarihi = updatedSeri.GirisTarihi,
+            AlisFiyati = updatedSeri.AlisFiyati,
+            SatisFiyati = updatedSeri.SatisFiyati
+        });
+    }
+
+    public async Task<ApiResponseDto<bool>> DeleteStokKalemiAsync(Guid id)
+    {
+        var seri = await _unitOfWork.Repository<SeriNumarasi>()
+            .GetByIdAsync(id);
+
+        if (seri == null || seri.Silindi)
+            return ApiResponseDto<bool>.Fail("Stok kalemi bulunamadı");
+
+        if (seri.Satildi)
+            return ApiResponseDto<bool>.Fail("Satılmış stok kalemi silinemez");
+
+        seri.Silindi = true;
+        await _unitOfWork.SaveChangesAsync();
+
+        return ApiResponseDto<bool>.Ok(true, "Stok kalemi silindi");
     }
 }
 

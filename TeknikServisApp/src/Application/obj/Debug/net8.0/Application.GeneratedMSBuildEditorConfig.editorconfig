@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = TeknikServisApp.Application
-build_property.ProjectDir = /Users/buber/Desktop/TeknikServisTelefon/TeknikServisApp/src/Application/
+build_property.ProjectDir = /Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Application/
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 

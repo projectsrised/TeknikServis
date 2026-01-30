@@ -31,3 +31,15 @@
 /Users/buber/Desktop/TeknikServisTelefon/TeknikServisApp/src/Domain/obj/Debug/net8.0/refint/Domain.dll
 /Users/buber/Desktop/TeknikServisTelefon/TeknikServisApp/src/Domain/obj/Debug/net8.0/Domain.pdb
 /Users/buber/Desktop/TeknikServisTelefon/TeknikServisApp/src/Domain/obj/Debug/net8.0/ref/Domain.dll
+/Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Domain/bin/Debug/net8.0/Domain.deps.json
+/Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Domain/bin/Debug/net8.0/Domain.dll
+/Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Domain/bin/Debug/net8.0/Domain.pdb
+/Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Domain/obj/Debug/net8.0/Domain.GeneratedMSBuildEditorConfig.editorconfig
+/Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Domain/obj/Debug/net8.0/Domain.AssemblyInfoInputs.cache
+/Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Domain/obj/Debug/net8.0/Domain.AssemblyInfo.cs
+/Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Domain/obj/Debug/net8.0/Domain.csproj.CoreCompileInputs.cache
+/Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Domain/obj/Debug/net8.0/Domain.sourcelink.json
+/Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Domain/obj/Debug/net8.0/Domain.dll
+/Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Domain/obj/Debug/net8.0/refint/Domain.dll
+/Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Domain/obj/Debug/net8.0/Domain.pdb
+/Users/emila/TypeScriptProject/TeknikServis/TeknikServisApp/src/Domain/obj/Debug/net8.0/ref/Domain.dll

@@ -31,11 +31,36 @@ interface StokGirisForm {
 }
 
 interface TedarikciForm {
-  adSoyad: string;
+  ad: string;
+  soyad: string;
   telefon: string;
   email: string;
   adres: string;
+  kurumsal: boolean;
 }
+
+// Renk listesi
+const RENKLER = [
+  'Siyah',
+  'Beyaz',
+  'Gri',
+  'Gümüş',
+  'Altın',
+  'Kırmızı',
+  'Mavi',
+  'Yeşil',
+  'Sarı',
+  'Turuncu',
+  'Pembe',
+  'Mor',
+  'Kahverengi',
+  'Lacivert',
+  'Turkuaz',
+  'Bordo',
+  'Bej',
+  'Krem',
+  'Diğer'
+];
 
 export default function StokGirisPage() {
   const router = useRouter();
@@ -53,10 +78,12 @@ export default function StokGirisPage() {
   const [showTedarikciModal, setShowTedarikciModal] = useState(false);
   const [savingTedarikci, setSavingTedarikci] = useState(false);
   const [tedarikciForm, setTedarikciForm] = useState<TedarikciForm>({
-    adSoyad: '',
+    ad: '',
+    soyad: '',
     telefon: '',
     email: '',
-    adres: ''
+    adres: '',
+    kurumsal: false
   });
 
   // Urun arama - her satır için ayrı state
@@ -64,6 +91,7 @@ export default function StokGirisPage() {
   const [activeSearchIndex, setActiveSearchIndex] = useState<number | null>(null);
   const [filteredUrunler, setFilteredUrunler] = useState<Urun[]>([]);
   const [selectedUrunler, setSelectedUrunler] = useState<{ [key: number]: Urun | null }>({});
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number } | null>(null);
   const searchInputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
 
   const { register, handleSubmit, watch, setValue, control } = useForm<StokGirisForm>({
@@ -99,6 +127,31 @@ export default function StokGirisPage() {
     }
   }, [selectedBayiId]);
 
+  // Dropdown pozisyonunu scroll ve resize'da güncelle
+  useEffect(() => {
+    if (activeSearchIndex !== null && dropdownPosition) {
+      const updatePosition = () => {
+        const input = searchInputRefs.current[activeSearchIndex];
+        if (input) {
+          const inputRect = input.getBoundingClientRect();
+          setDropdownPosition({
+            top: inputRect.bottom + window.scrollY + 4,
+            left: inputRect.left + window.scrollX,
+            width: inputRect.width
+          });
+        }
+      };
+
+      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener('resize', updatePosition);
+
+      return () => {
+        window.removeEventListener('scroll', updatePosition, true);
+        window.removeEventListener('resize', updatePosition);
+      };
+    }
+  }, [activeSearchIndex, dropdownPosition]);
+
   const loadInitialData = async () => {
     try {
       setLoading(true);
@@ -109,7 +162,15 @@ export default function StokGirisPage() {
       ]);
 
       if (tedarikciRes.data.basarili) setTedarikciler(tedarikciRes.data.data || []);
-      if (urunRes.data.basarili) setUrunler(urunRes.data.data.items || []);
+      
+      // Ürün listesi yükleme - farklı response formatlarını kontrol et
+      if (urunRes.data) {
+        const urunData = urunRes.data.basarili 
+          ? (urunRes.data.data?.items || urunRes.data.data || [])
+          : (urunRes.data.items || urunRes.data || []);
+        setUrunler(Array.isArray(urunData) ? urunData : []);
+        console.log('Yüklenen ürün sayısı:', urunData.length);
+      }
 
       // Bayileri ayarla ve merkez bayiyi bul
       if (bayiRes.data) {
@@ -157,17 +218,30 @@ export default function StokGirisPage() {
   // Ürün arama - düzeltilmiş versiyon
   const handleUrunSearch = useCallback((search: string, index: number) => {
     setSearchTexts(prev => ({ ...prev, [index]: search }));
-    setActiveSearchIndex(index);
-
-    if (search.length >= 2) {
+    
+    if (search.length >= 2 && urunler.length > 0) {
+      const searchLower = search.toLowerCase();
       const filtered = urunler.filter(u =>
-        u.ad.toLowerCase().includes(search.toLowerCase()) ||
-        (u.kod && u.kod.toLowerCase().includes(search.toLowerCase())) ||
-        (u.barkod && u.barkod.includes(search))
+        (u.ad && u.ad.toLowerCase().includes(searchLower)) ||
+        (u.kod && u.kod.toLowerCase().includes(searchLower)) ||
+        (u.barkod && u.barkod.toString().includes(search))
       );
-      setFilteredUrunler(filtered.slice(0, 10));
+      const limited = filtered.slice(0, 10);
+      
+      // State'leri aynı anda güncelle
+      setFilteredUrunler(limited);
+      setActiveSearchIndex(index); // Dropdown'ı göster
+      
+      console.log(`Arama: "${search}" - Bulunan: ${filtered.length} ürün, Gösterilen: ${limited.length}`);
+      console.log('Active Search Index set to:', index, 'Filtered count:', limited.length);
     } else {
       setFilteredUrunler([]);
+      if (search.length === 0) {
+        setActiveSearchIndex(null);
+      } else {
+        // 2 karakterden az ama yazılıyorsa index'i aktif tut
+        setActiveSearchIndex(index);
+      }
     }
   }, [urunler]);
 
@@ -178,6 +252,7 @@ export default function StokGirisPage() {
     setValue(`kalemler.${index}.kdvOran`, urun.kdvOran || 20);
     setSelectedUrunler(prev => ({ ...prev, [index]: urun }));
     setActiveSearchIndex(null);
+    setDropdownPosition(null);
     setSearchTexts(prev => ({ ...prev, [index]: '' }));
     setFilteredUrunler([]);
   };
@@ -195,20 +270,29 @@ export default function StokGirisPage() {
 
   // Tedarikçi kaydetme
   const handleSaveTedarikci = async () => {
-    if (!tedarikciForm.adSoyad.trim()) {
-      toast.error('Ad Soyad zorunludur');
+    if (!tedarikciForm.ad.trim()) {
+      toast.error('Ad zorunludur');
       return;
     }
     if (!tedarikciForm.telefon.trim()) {
       toast.error('Telefon zorunludur');
       return;
     }
+    if (!tedarikciForm.email.trim()) {
+      toast.error('E-posta zorunludur');
+      return;
+    }
 
     setSavingTedarikci(true);
     try {
       const response = await musteriApi.create({
-        ...tedarikciForm,
-        tepiMu: true // Tedarikçi olarak işaretle
+        ad: tedarikciForm.ad,
+        soyad: tedarikciForm.soyad || (tedarikciForm.kurumsal ? '' : 'Yok'),
+        telefon: tedarikciForm.telefon,
+        email: tedarikciForm.email,
+        adres: tedarikciForm.adres || undefined,
+        kurumsal: tedarikciForm.kurumsal,
+        tedarikci: true // Tedarikçi olarak işaretle
       });
 
       if (response.data.basarili || response.data.id) {
@@ -217,7 +301,7 @@ export default function StokGirisPage() {
         setValue('tedarikciId', yeniTedarikci.id);
         toast.success('Tedarikçi eklendi');
         setShowTedarikciModal(false);
-        setTedarikciForm({ adSoyad: '', telefon: '', email: '', adres: '' });
+        setTedarikciForm({ ad: '', soyad: '', telefon: '', email: '', adres: '', kurumsal: false });
       } else {
         toast.error(response.data.mesaj || 'Tedarikçi eklenemedi');
       }
@@ -515,40 +599,121 @@ export default function StokGirisPage() {
                       ) : (
                         <div className="relative">
                           <div className="relative">
-                            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-secondary-400 pointer-events-none" />
+                            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-secondary-400 pointer-events-none z-10" />
                             <input
                               ref={(el) => { searchInputRefs.current[index] = el; }}
                               type="text"
                               className="input input-sm pl-7 w-full"
-                              placeholder="Ürün ara..."
+                              placeholder="Ürün ara... (min 2 karakter)"
                               value={searchTexts[index] || ''}
-                              onChange={(e) => handleUrunSearch(e.target.value, index)}
-                              onFocus={() => {
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                // Input pozisyonunu güncelle
+                                const inputRect = e.currentTarget.getBoundingClientRect();
+                                setDropdownPosition({
+                                  top: inputRect.bottom + window.scrollY + 4,
+                                  left: inputRect.left + window.scrollX,
+                                  width: inputRect.width
+                                });
+                                handleUrunSearch(value, index);
+                              }}
+                              onFocus={(e) => {
                                 setActiveSearchIndex(index);
+                                // Input pozisyonunu hesapla
+                                const inputRect = e.currentTarget.getBoundingClientRect();
+                                setDropdownPosition({
+                                  top: inputRect.bottom + window.scrollY + 4,
+                                  left: inputRect.left + window.scrollX,
+                                  width: inputRect.width
+                                });
                                 if ((searchTexts[index] || '').length >= 2) {
                                   handleUrunSearch(searchTexts[index] || '', index);
                                 }
                               }}
+                              onBlur={(e) => {
+                                // Dropdown'a tıklanıyorsa blur'u engelle
+                                const relatedTarget = e.relatedTarget as HTMLElement;
+                                if (relatedTarget && relatedTarget.closest('.urun-dropdown')) {
+                                  console.log('Blur engellendi - dropdown tıklanıyor');
+                                  return;
+                                }
+                                // Blur'u geciktir ki dropdown tıklaması çalışsın
+                                setTimeout(() => {
+                                  // Eğer hala aynı index aktifse ve dropdown'a tıklanmadıysa kapat
+                                  if (activeSearchIndex === index) {
+                                    const activeElement = document.activeElement;
+                                    if (!activeElement || !activeElement.closest('.urun-dropdown')) {
+                                      console.log('Dropdown kapatılıyor - blur timeout');
+                                      setActiveSearchIndex(null);
+                                      setDropdownPosition(null);
+                                    }
+                                  }
+                                }, 250);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Escape') {
+                                  setActiveSearchIndex(null);
+                                  setDropdownPosition(null);
+                                  setFilteredUrunler([]);
+                                }
+                              }}
                             />
                           </div>
-                          {activeSearchIndex === index && filteredUrunler.length > 0 && (
-                            <div className="absolute z-30 w-72 mt-1 bg-white border border-secondary-200 rounded-lg shadow-lg max-h-48 overflow-auto">
+                          {activeSearchIndex === index && filteredUrunler.length > 0 && dropdownPosition && (
+                            <div 
+                              className="urun-dropdown fixed bg-white border-2 border-primary-200 rounded-lg shadow-2xl max-h-48 overflow-auto"
+                              style={{ 
+                                position: 'fixed',
+                                top: `${dropdownPosition.top}px`,
+                                left: `${dropdownPosition.left}px`,
+                                width: `${dropdownPosition.width}px`,
+                                zIndex: 99999,
+                                maxHeight: '12rem'
+                              }}
+                              onMouseDown={(e) => {
+                                // Prevent input blur when clicking dropdown
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log('Dropdown mouseDown - blur engellendi');
+                              }}
+                            >
                               {filteredUrunler.map(urun => (
                                 <button
                                   key={urun.id}
                                   type="button"
-                                  onClick={() => selectUrun(urun, index)}
-                                  className="w-full p-2 text-left hover:bg-secondary-50 flex items-center gap-2 border-b border-secondary-100 last:border-b-0"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    selectUrun(urun, index);
+                                  }}
+                                  className="w-full p-2 text-left hover:bg-secondary-50 flex items-center gap-2 border-b border-secondary-100 last:border-b-0 cursor-pointer"
                                 >
                                   <Package className="w-4 h-4 text-secondary-400 flex-shrink-0" />
-                                  <div className="min-w-0">
+                                  <div className="min-w-0 flex-1">
                                     <p className="font-medium text-secondary-900 text-sm truncate">{urun.ad}</p>
                                     <p className="text-xs text-secondary-500">
-                                      {urun.kod} | Alış: {formatCurrency(urun.alisFiyat)}
+                                      {urun.kod || 'Kod yok'} | Alış: {formatCurrency(urun.alisFiyat || 0)}
                                     </p>
                                   </div>
                                 </button>
                               ))}
+                            </div>
+                          )}
+                          {activeSearchIndex === index && (searchTexts[index] || '').length >= 2 && filteredUrunler.length === 0 && dropdownPosition && (
+                            <div 
+                              className="urun-dropdown fixed bg-white border border-secondary-200 rounded-lg shadow-xl p-3 text-sm text-secondary-500"
+                              style={{ 
+                                position: 'fixed',
+                                top: `${dropdownPosition.top}px`,
+                                left: `${dropdownPosition.left}px`,
+                                width: `${dropdownPosition.width}px`,
+                                zIndex: 99999
+                              }}
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                              }}
+                            >
+                              Ürün bulunamadı
                             </div>
                           )}
                         </div>
@@ -558,12 +723,15 @@ export default function StokGirisPage() {
 
                     {/* Renk */}
                     <td className="px-3 py-2">
-                      <input
-                        type="text"
+                      <select
                         {...register(`kalemler.${index}.renk`)}
-                        className="input input-sm w-full text-xs"
-                        placeholder="Renk"
-                      />
+                        className="select input-sm w-full text-xs"
+                      >
+                        <option value="">Renk Seçin</option>
+                        {RENKLER.map(renk => (
+                          <option key={renk} value={renk}>{renk}</option>
+                        ))}
+                      </select>
                     </td>
 
                     {/* Adet */}
@@ -728,16 +896,7 @@ export default function StokGirisPage() {
         </Card>
       </form>
 
-      {/* Click-away handler for search dropdown */}
-      {activeSearchIndex !== null && (
-        <div
-          className="fixed inset-0 z-20"
-          onClick={() => {
-            setActiveSearchIndex(null);
-            setFilteredUrunler([]);
-          }}
-        />
-      )}
+      {/* Click-away handler for search dropdown - removed, using onBlur instead */}
 
       {/* Tedarikçi Ekleme Modal */}
       <Modal
@@ -747,15 +906,40 @@ export default function StokGirisPage() {
       >
         <div className="space-y-4">
           <div>
-            <label className="label">Ad Soyad / Firma Adı *</label>
+            <label className="flex items-center gap-2 label">
+              <input
+                type="checkbox"
+                checked={tedarikciForm.kurumsal}
+                onChange={(e) => setTedarikciForm(prev => ({ ...prev, kurumsal: e.target.checked }))}
+                className="w-4 h-4 rounded border-secondary-300 text-primary-500"
+              />
+              <span>Kurumsal / Firma</span>
+            </label>
+          </div>
+
+          <div>
+            <label className="label">Ad / Firma Adı *</label>
             <input
               type="text"
               className="input"
-              placeholder="Tedarikçi adı"
-              value={tedarikciForm.adSoyad}
-              onChange={(e) => setTedarikciForm(prev => ({ ...prev, adSoyad: e.target.value }))}
+              placeholder={tedarikciForm.kurumsal ? "Firma adı" : "Ad"}
+              value={tedarikciForm.ad}
+              onChange={(e) => setTedarikciForm(prev => ({ ...prev, ad: e.target.value }))}
             />
           </div>
+
+          {!tedarikciForm.kurumsal && (
+            <div>
+              <label className="label">Soyad</label>
+              <input
+                type="text"
+                className="input"
+                placeholder="Soyad"
+                value={tedarikciForm.soyad}
+                onChange={(e) => setTedarikciForm(prev => ({ ...prev, soyad: e.target.value }))}
+              />
+            </div>
+          )}
 
           <div>
             <label className="label">Telefon *</label>
@@ -769,7 +953,7 @@ export default function StokGirisPage() {
           </div>
 
           <div>
-            <label className="label">E-posta</label>
+            <label className="label">E-posta *</label>
             <input
               type="email"
               className="input"

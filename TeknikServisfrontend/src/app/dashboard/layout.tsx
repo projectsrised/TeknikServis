@@ -42,7 +42,7 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-secondary-100">
       <Sidebar />
       <Header />
-      <main className="ml-64 pt-16 p-6">
+      <main className="ml-16 pt-16 p-6">
         {children}
       </main>
     </div>

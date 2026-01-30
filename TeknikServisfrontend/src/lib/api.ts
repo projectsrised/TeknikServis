@@ -197,6 +197,10 @@ export const stokApi = {
   cikis: (data: any) => api.post('/stok/cikis', data),
   getTedarikciler: () => api.get('/stok/tedarikciler'),
   girisWithFatura: (data: any) => api.post('/stok/giris-fatura', data),
+  getKalemler: (page = 1, pageSize = 20, urunId?: string, depoId?: string, satildi?: boolean) =>
+    api.get('/stok/kalemler', { params: { page, pageSize, urunId, depoId, satildi } }),
+  updateKalem: (id: string, data: any) => api.put(`/stok/kalem/${id}`, data),
+  deleteKalem: (id: string) => api.delete(`/stok/kalem/${id}`),
 };
 
 // Kasa API

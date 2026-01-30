@@ -82,6 +82,30 @@ public async Task<IActionResult> GetStokDurum([FromQuery] Guid? bayiId = null)
         var result = await _stokService.StokGirisiWithFaturaAsync(dto);
         return result.Basarili ? Ok(result) : BadRequest(result);
     }
+
+    [HttpGet("kalemler")]
+    public async Task<IActionResult> GetStokKalemleri([FromQuery] int page = 1, [FromQuery] int pageSize = 20,
+        [FromQuery] Guid? urunId = null, [FromQuery] Guid? depoId = null, [FromQuery] bool? satildi = null)
+    {
+        var result = await _stokService.GetStokKalemleriAsync(page, pageSize, urunId, depoId, satildi);
+        return Ok(new { basarili = true, data = result });
+    }
+
+    [HttpPut("kalem/{id}")]
+    [Authorize(Roles = "SuperAdmin,TenantAdmin,BayiAdmin")]
+    public async Task<IActionResult> UpdateStokKalemi(Guid id, [FromBody] SeriNumarasiUpdateDto dto)
+    {
+        var result = await _stokService.UpdateStokKalemiAsync(id, dto);
+        return result.Basarili ? Ok(result) : BadRequest(result);
+    }
+
+    [HttpDelete("kalem/{id}")]
+    [Authorize(Roles = "SuperAdmin,TenantAdmin,BayiAdmin")]
+    public async Task<IActionResult> DeleteStokKalemi(Guid id)
+    {
+        var result = await _stokService.DeleteStokKalemiAsync(id);
+        return result.Basarili ? Ok(result) : BadRequest(result);
+    }
 }
 
 [Authorize]

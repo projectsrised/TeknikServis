@@ -197,6 +197,9 @@ public interface IStokService
     Task<ApiResponseDto<bool>> StokCikisiAsync(StokCikisDto dto);
     Task<ApiResponseDto<StokGirisSonucDto>> StokGirisiWithFaturaAsync(StokGirisFaturaDto dto);
     Task<List<MusteriDto>> GetTedarikciListAsync();
+    Task<PagedResultDto<SeriNumarasiDetayDto>> GetStokKalemleriAsync(int page, int pageSize, Guid? urunId = null, Guid? depoId = null, bool? satildi = null);
+    Task<ApiResponseDto<SeriNumarasiDetayDto>> UpdateStokKalemiAsync(Guid id, SeriNumarasiUpdateDto dto);
+    Task<ApiResponseDto<bool>> DeleteStokKalemiAsync(Guid id);
 }
 
 public interface IRaporService

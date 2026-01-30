@@ -289,6 +289,24 @@ export interface SeriNumarasi {
   satisFiyati?: number;
 }
 
+export interface SeriNumarasiDetay {
+  id: string;
+  seriNo: string;
+  urunId: string;
+  urunAd?: string;
+  barkod?: string;
+  kategoriAd?: string;
+  uretimTarihi?: string;
+  mensei?: string;
+  mevcutDepoAd?: string;
+  mevcutBayiAd?: string;
+  satildi: boolean;
+  satisTarihi?: string;
+  girisTarihi: string;
+  alisFiyati?: number;
+  satisFiyati?: number;
+}
+
 // Satis
 export interface Satis {
   id: string;

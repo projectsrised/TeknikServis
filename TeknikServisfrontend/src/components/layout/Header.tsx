@@ -23,7 +23,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="h-16 bg-white border-b border-secondary-200 fixed top-0 right-0 left-64 z-40">
+    <header className="h-16 bg-white border-b border-secondary-200 fixed top-0 right-0 left-16 group-hover:left-64 z-40 transition-all duration-300">
       <div className="h-full px-6 flex items-center justify-between">
         {/* Search */}
         <div className="flex-1 max-w-xl">
