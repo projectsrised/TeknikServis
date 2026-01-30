@@ -106,6 +106,22 @@ public async Task<IActionResult> GetStokDurum([FromQuery] Guid? bayiId = null)
         var result = await _stokService.DeleteStokKalemiAsync(id);
         return result.Basarili ? Ok(result) : BadRequest(result);
     }
+
+    [HttpDelete("urun/{urunId}")]
+    [Authorize(Roles = "SuperAdmin,TenantAdmin,BayiAdmin")]
+    public async Task<IActionResult> DeleteUrunStoklari(Guid urunId, [FromQuery] Guid? depoId = null)
+    {
+        var result = await _stokService.DeleteUrunStoklariAsync(urunId, depoId);
+        return result.Basarili ? Ok(result) : BadRequest(result);
+    }
+
+    [HttpDelete("hareket/{id}")]
+    [Authorize(Roles = "SuperAdmin,TenantAdmin,BayiAdmin")]
+    public async Task<IActionResult> DeleteStokHareketi(Guid id)
+    {
+        var result = await _stokService.DeleteStokHareketiAsync(id);
+        return result.Basarili ? Ok(result) : BadRequest(result);
+    }
 }
 
 [Authorize]

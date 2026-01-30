@@ -18,9 +18,26 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        if (builder.Environment.IsDevelopment())
+        {
+            // Development: Tüm localhost portlarına izin ver
+            policy.WithOrigins(
+                    "http://localhost:3000", 
+                    "http://localhost:3001",
+                    "http://127.0.0.1:3000",
+                    "http://127.0.0.1:3001"
+                  )
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        }
+        else
+        {
+            // Production: Tüm origin'lere izin ver (güvenlik için production'da spesifik origin'ler belirtilmeli)
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        }
     });
 });
 
@@ -36,6 +53,8 @@ app.UseSwaggerUI(c =>
 });
 
 // app.UseHttpsRedirection(); // Disabled for development
+
+// CORS must be before authentication
 app.UseCors("AllowAll");
 
 app.UseAuthentication();

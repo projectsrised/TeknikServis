@@ -632,10 +632,154 @@ public async Task<List<StokDurumDto>> GetTumStokDurumuAsync(Guid? bayiId = null)
         if (seri.Satildi)
             return ApiResponseDto<bool>.Fail("Satılmış stok kalemi silinemez");
 
+        // Stok kalemine ait aktif hareketleri kontrol et
+        var aktifHareketler = await _unitOfWork.Repository<StokHareket>()
+            .Query()
+            .Where(h => h.SeriNumarasiId == id && !h.Silindi)
+            .ToListAsync();
+
+        // Aktif işlemlerde kullanılıyor mu kontrol et
+        var aktifSatis = await _unitOfWork.Repository<Satis>()
+            .Query()
+            .Include(s => s.Kalemler)
+            .Where(s => !s.Silindi && !s.IptalEdildi && s.Kalemler.Any(k => k.SeriNumarasiId == id))
+            .AnyAsync();
+
+        var aktifTransfer = await _unitOfWork.Repository<Transfer>()
+            .Query()
+            .Include(t => t.Kalemler)
+            .Where(t => !t.Silindi && t.Durum != TransferDurum.Tamamlandi && t.Durum != TransferDurum.IptalEdildi && 
+                       t.Kalemler.Any(k => k.SeriNumarasiId == id))
+            .AnyAsync();
+
+        var aktifIade = await _unitOfWork.Repository<Iade>()
+            .Query()
+            .Include(i => i.Kalemler)
+            .Where(i => !i.Silindi && i.Durum != IadeDurum.Tamamlandi && i.Durum != IadeDurum.Reddedildi && 
+                      i.Kalemler.Any(k => k.SeriNumarasiId == id))
+            .AnyAsync();
+
+        var aktifSayim = await _unitOfWork.Repository<Sayim>()
+            .Query()
+            .Include(s => s.Kalemler)
+            .Where(s => !s.Silindi && s.Durum != SayimDurum.Tamamlandi && s.Durum != SayimDurum.IptalEdildi && 
+                       s.Kalemler.Any(k => k.SeriNumarasiId == id))
+            .AnyAsync();
+
+        // Aktif işlemlerde kullanılıyorsa silme
+        if (aktifSatis || aktifTransfer || aktifIade || aktifSayim)
+        {
+            return ApiResponseDto<bool>.Fail("Bu stok kalemi aktif bir işlemde kullanılıyor, silinemez");
+        }
+
+        // Eğer stok hala depoda ise (DepoId varsa) silme
+        if (seri.DepoId.HasValue)
+        {
+            return ApiResponseDto<bool>.Fail("Bu stok kalemi hala depoda mevcut, silinemez");
+        }
+
+        // Stok kalemini sil
         seri.Silindi = true;
         await _unitOfWork.SaveChangesAsync();
 
         return ApiResponseDto<bool>.Ok(true, "Stok kalemi silindi");
+    }
+
+    public async Task<ApiResponseDto<bool>> DeleteStokHareketiAsync(Guid id)
+    {
+        var hareket = await _unitOfWork.Repository<StokHareket>()
+            .GetByIdAsync(id);
+
+        if (hareket == null || hareket.Silindi)
+            return ApiResponseDto<bool>.Fail("Stok hareketi bulunamadı");
+
+        // Stok hareketini sil
+        hareket.Silindi = true;
+        await _unitOfWork.SaveChangesAsync();
+
+        // Eğer bu hareket bir stok kalemine aitse, o stok kalemine ait tüm hareketlerin bitip bitmediğini kontrol et
+        if (hareket.SeriNumarasiId.HasValue)
+        {
+            var seriId = hareket.SeriNumarasiId.Value;
+            
+            // Stok kalemine ait kalan aktif hareketleri kontrol et
+            var kalanHareketler = await _unitOfWork.Repository<StokHareket>()
+                .Query()
+                .Where(h => h.SeriNumarasiId == seriId && !h.Silindi)
+                .ToListAsync();
+
+            // Stok kalemini kontrol et
+            var seri = await _unitOfWork.Repository<SeriNumarasi>()
+                .GetByIdAsync(seriId);
+
+            if (seri != null && !seri.Silindi && !seri.Satildi)
+            {
+                // Aktif işlemlerde kullanılıyor mu kontrol et
+                var aktifSatis = await _unitOfWork.Repository<Satis>()
+                    .Query()
+                    .Include(s => s.Kalemler)
+                    .Where(s => !s.Silindi && !s.IptalEdildi && s.Kalemler.Any(k => k.SeriNumarasiId == seriId))
+                    .AnyAsync();
+
+                var aktifTransfer = await _unitOfWork.Repository<Transfer>()
+                    .Query()
+                    .Include(t => t.Kalemler)
+                    .Where(t => !t.Silindi && t.Durum != TransferDurum.Tamamlandi && t.Durum != TransferDurum.IptalEdildi && 
+                               t.Kalemler.Any(k => k.SeriNumarasiId == seriId))
+                    .AnyAsync();
+
+                var aktifIade = await _unitOfWork.Repository<Iade>()
+                    .Query()
+                    .Include(i => i.Kalemler)
+                    .Where(i => !i.Silindi && i.Durum != IadeDurum.Tamamlandi && i.Durum != IadeDurum.Reddedildi && 
+                              i.Kalemler.Any(k => k.SeriNumarasiId == seriId))
+                    .AnyAsync();
+
+                var aktifSayim = await _unitOfWork.Repository<Sayim>()
+                    .Query()
+                    .Include(s => s.Kalemler)
+                    .Where(s => !s.Silindi && s.Durum != SayimDurum.Tamamlandi && s.Durum != SayimDurum.IptalEdildi && 
+                               s.Kalemler.Any(k => k.SeriNumarasiId == seriId))
+                    .AnyAsync();
+
+                // Eğer aktif işlem yoksa ve stok depoda değilse ve tüm hareketler bitmişse, stok kalemini sil
+                if (!aktifSatis && !aktifTransfer && !aktifIade && !aktifSayim && 
+                    !seri.DepoId.HasValue && kalanHareketler.Count == 0)
+                {
+                    seri.Silindi = true;
+                    await _unitOfWork.SaveChangesAsync();
+                    return ApiResponseDto<bool>.Ok(true, "Stok hareketi silindi ve ilgili stok kalemi otomatik olarak silindi");
+                }
+            }
+        }
+
+        return ApiResponseDto<bool>.Ok(true, "Stok hareketi silindi");
+    }
+
+    public async Task<ApiResponseDto<int>> DeleteUrunStoklariAsync(Guid urunId, Guid? depoId = null)
+    {
+        var query = _unitOfWork.Repository<SeriNumarasi>()
+            .Query()
+            .Where(s => s.UrunId == urunId && !s.Satildi && !s.Silindi && s.DepoId.HasValue);
+
+        if (depoId.HasValue)
+            query = query.Where(s => s.DepoId == depoId.Value);
+
+        var stoklar = await query.ToListAsync();
+
+        if (stoklar.Count == 0)
+            return ApiResponseDto<int>.Fail("Silinecek stok bulunamadı");
+
+        var silinenSayisi = 0;
+        foreach (var stok in stoklar)
+        {
+            stok.Silindi = true;
+            silinenSayisi++;
+        }
+
+        await _unitOfWork.SaveChangesAsync();
+
+        return ApiResponseDto<int>.Ok(silinenSayisi, $"{silinenSayisi} adet stok kalemi silindi");
     }
 }
 

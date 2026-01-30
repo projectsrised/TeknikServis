@@ -1,10 +1,54 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/store/authStore';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+// Environment'a göre API URL belirleme
+// Development: Next.js rewrite kullan (CORS sorunu olmaz)
+// Production: NEXT_PUBLIC_API_URL environment variable'dan alınır
+const getApiUrl = (): string => {
+  // Client-side kontrol
+  if (typeof window === 'undefined') {
+    // Server-side: Development'ta boş, production'da environment variable
+    return process.env.NEXT_PUBLIC_API_URL || '';
+  }
+  
+  // Client-side: Development'ta her zaman rewrite kullan
+  // Production'da environment variable kullan
+  const isDevelopment = process.env.NODE_ENV === 'development' || 
+                       window.location.hostname === 'localhost' ||
+                       window.location.hostname === '127.0.0.1';
+  
+  if (isDevelopment) {
+    // Development'ta Next.js rewrite kullan (relative path)
+    // next.config.js'de /api/* -> http://localhost:5000/api/* rewrite'ı var
+    // Bu sayede CORS sorunu olmaz çünkü aynı origin'den istek atılır
+    return '';
+  }
+  
+  // Production'da environment variable kullan
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  
+  // Fallback: Production'da environment variable yoksa window.location kullan
+  const protocol = window.location.protocol;
+  const host = window.location.host;
+  return `${protocol}//${host}`;
+};
+
+const API_URL = getApiUrl();
+
+// Base URL oluştur
+// Development'ta boş string ise sadece /api kullan (Next.js rewrite)
+// Production'da tam URL kullan
+const baseURL = API_URL ? `${API_URL}/api` : '/api';
+
+// Debug log (sadece development'ta)
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  console.log('[API] Base URL:', baseURL, '| API_URL:', API_URL, '| NODE_ENV:', process.env.NODE_ENV);
+}
 
 export const api = axios.create({
-  baseURL: `${API_URL}/api`,
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -201,6 +245,9 @@ export const stokApi = {
     api.get('/stok/kalemler', { params: { page, pageSize, urunId, depoId, satildi } }),
   updateKalem: (id: string, data: any) => api.put(`/stok/kalem/${id}`, data),
   deleteKalem: (id: string) => api.delete(`/stok/kalem/${id}`),
+  deleteUrunStoklari: (urunId: string, depoId?: string) => 
+    api.delete(`/stok/urun/${urunId}`, { params: { depoId } }),
+  deleteHareket: (id: string) => api.delete(`/stok/hareket/${id}`),
 };
 
 // Kasa API
